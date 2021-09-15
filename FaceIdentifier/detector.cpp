@@ -14,15 +14,16 @@ using namespace cv;
 // Function that receives a frame, a CascadeClassider target and a Rect vector,
 // and stores the instances of the the found object withnin the frame inside the vector,
 // and draws a rectangle
-void detect(Mat frame, CascadeClassifier target, vector<Rect>Instances){
+void detect(Mat frame, CascadeClassifier target, vector<Rect>Instances, double scale){
     Mat grayFrame;
     cvtColor(frame, grayFrame, COLOR_BGR2GRAY );
-    //equalizeHist( grayFrame, grayFrame );
-    target.detectMultiScale(grayFrame, Instances);
+    equalizeHist( grayFrame, grayFrame );
+    resize(grayFrame, grayFrame,Size(grayFrame.size().width /scale,grayFrame.size().height /scale));
+    target.detectMultiScale(grayFrame, Instances,1.1,3,0,Size(45,35));
     Scalar color = Scalar(0,0,255);
 
     for (int i = 0; i < Instances.size(); i++){
-        rectangle(frame,Point(Instances[i].x,Instances[i].y),Point(Instances[i].x +Instances[i].width,Instances[i].y +Instances[i].height), color,7);
+        rectangle(frame,Point(cvRound(Instances[i].x*scale),cvRound(Instances[i].y*scale)),Point(cvRound((Instances[i].x +Instances[i].width)*scale),cvRound((Instances[i].y +Instances[i].height)*scale)), color,6);
         imshow("Detector", frame);
     }
 }
@@ -49,7 +50,7 @@ int main() {
             cout<<"NULL frame ";
             break;
         }
-        detect(frame,faces_haar,facesID);
+        detect(frame,faces_haar,facesID,2.0);
         // Read key board input, setting esc as break key
         if(waitKey(10)== 27){
             break;
