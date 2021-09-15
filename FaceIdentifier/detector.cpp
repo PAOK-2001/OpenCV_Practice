@@ -34,7 +34,7 @@ int main() {
     // Create OpenCV frame object to store frame information
     Mat frame;
     // Create VideoCapture object, reading video device (USB camera)
-    VideoCapture camera(2);
+    VideoCapture camera(0);
     vector<Rect>facesID;
     // Check if the camera is readable
     if(!camera.isOpened()){
