@@ -10,16 +10,19 @@
 using namespace std;
 using namespace cv;
 
-
+// detect funtion
+// Function that receives a frame, a CascadeClassider target and a Rect vector,
+// and stores the instances of the the found object withnin the frame inside the vector,
+// and draws a rectangle
 void detect(Mat frame, CascadeClassifier target, vector<Rect>Instances){
     Mat grayFrame;
     cvtColor(frame, grayFrame, COLOR_BGR2GRAY );
     //equalizeHist( grayFrame, grayFrame );
     target.detectMultiScale(grayFrame, Instances);
-    Scalar color = Scalar(255,0,0);
+    Scalar color = Scalar(0,0,255);
 
     for (int i = 0; i < Instances.size(); i++){
-        rectangle(frame,Point(Instances[i].x,Instances[i].y),Point(Instances[i].x +Instances[i].width,Instances[i].y +Instances[i].height), color);
+        rectangle(frame,Point(Instances[i].x,Instances[i].y),Point(Instances[i].x +Instances[i].width,Instances[i].y +Instances[i].height), color,7);
         imshow("Detector", frame);
     }
 }
