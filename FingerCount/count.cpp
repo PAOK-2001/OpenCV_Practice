@@ -20,13 +20,18 @@ private:
     int fingers;
     bool isHand;
 public:
-    Hand();
+    Hand(Mat frame);
     Hand(Mat frame, Mat background);
     Mat returnImage();
 };
 
+Hand::Hand(Mat frame){
+    cvtColor(frame, frame, COLOR_BGR2GRAY);
+    threshold(frame, image,70,255,THRESH_OTSU);
+}
+
 Hand::Hand(Mat frame, Mat background){
-    absdiff(frame,background, contrast);
+    absdiff(frame,background*1.35, contrast);
     cvtColor(contrast, contrast, COLOR_BGR2GRAY );
     threshold(contrast, image,70,255,THRESH_OTSU);
 }
@@ -85,15 +90,18 @@ int main() {
             }
             
             rectangle(frame,ROI,red,5);
-            frame(ROI).copyTo(background);
-            Hand h1(frame(ROI),background);
+            Hand h1(frame(ROI));
             imshow("Camera Feed", frame);
             imshow("Region of Interest", h1.returnImage());
             // Read key board input, setting esc as break key
             if(waitKey(10)== 27){
                 break;
             }
-            hasBackground = true;
+
+            if(waitKey(10)== 32){
+                frame(ROI).copyTo(background);
+                hasBackground = true;
+            }
         }
 
     }
