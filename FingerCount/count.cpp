@@ -31,7 +31,7 @@ Hand::Hand(Mat frame){
 }
 
 Hand::Hand(Mat frame, Mat background){
-    absdiff(frame,background*1.35, contrast);
+    absdiff(frame*1.25,background, contrast);
     cvtColor(contrast, contrast, COLOR_BGR2GRAY );
     threshold(contrast, image,70,255,THRESH_OTSU);
 }
@@ -100,6 +100,7 @@ int main() {
 
             if(waitKey(10)== 32){
                 frame(ROI).copyTo(background);
+                cout<<"Fondo guardado"<<endl;
                 hasBackground = true;
             }
         }
