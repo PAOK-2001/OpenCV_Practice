@@ -13,6 +13,27 @@ using namespace std;
 using namespace cv;
 
 
+class Hand{
+private:
+    Mat image;
+    int fingers;
+    bool isHand;
+public:
+    Hand();
+    Hand(Mat frame);
+    Mat returnImage();
+};
+
+Hand::Hand(Mat frame){
+    cvtColor(frame, frame, COLOR_BGR2GRAY );
+    threshold(frame, image,70,255,THRESH_BINARY);
+}
+
+
+Mat Hand::returnImage(){
+    return image;
+}
+
 
 
 int main() {
@@ -22,7 +43,7 @@ int main() {
     // Scalar object represent red
     Scalar red = Scalar(0,0,255);
     // Rectangle that limits the Region of Interest (ROI)
-    Rect ROI(410,45,190,190);
+    Rect ROI(410,45,225,225);
 
     // Create VideoCapture object, reading video device (USB camera)
     VideoCapture camera(2);
@@ -43,9 +64,9 @@ int main() {
         }
         
         rectangle(frame,ROI,red,5);
-        Region = frame(ROI);
+        Hand h1(frame(ROI));
         imshow("Camera Feed", frame);
-        imshow("Region of Interest",Region);
+        imshow("Region of Interest", h1.returnImage());
         // Read key board input, setting esc as break key
         if(waitKey(10)== 27){
             break;
