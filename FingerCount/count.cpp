@@ -30,13 +30,6 @@ public:
     Mat returnImage();
 };
 
-Hand::Hand(Mat frame){
-    Mat contrast;
-    frame = 1.45*frame; //Aument saturation by multiplying integer
-    blur(frame,contrast,Size(3,3));
-    cvtColor(contrast, contrast, COLOR_BGR2GRAY);
-    threshold(contrast, image,255,255,THRESH_OTSU);
-}
 
 Hand::Hand(Mat frame, Mat background){
     Mat contrast;
@@ -85,6 +78,8 @@ void Hand::drawHand(Mat frame){
 }
 
 int main() {
+    vector<vector<Point>> countours;
+    vector<Vec4i> hierchy;
     bool hasBackground = false;
     // Create OpenCV frame object to store frame information
     Mat frame;
@@ -112,7 +107,7 @@ int main() {
                 cout<<"NULL frame ";
                 break;
             }
-            rectangle(frame,ROI,color,5);
+            rectangle(frame,ROI,color,2);
             Hand h1(frame(ROI), background);
             h1.getHand();
             h1.drawHand(frame);
@@ -138,7 +133,7 @@ int main() {
                 break;
             }
             putText(frame,"No background!",Point(10,450),FONT_HERSHEY_TRIPLEX,1,color,3);
-            rectangle(frame,ROI,color,5);
+            rectangle(frame,ROI,color,2);
             Hand h1(frame(ROI));
             imshow("Camera Feed", frame);
             // Read key board input, setting esc as break key
