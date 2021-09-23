@@ -27,14 +27,16 @@ public:
 
 Hand::Hand(Mat frame){
     frame = 1.45*frame; //Aument saturation by multiplying integer
-    cvtColor(frame, frame, COLOR_BGR2GRAY);
-    threshold(frame, image,255,255,THRESH_OTSU);
+    blur(frame,contrast,Size(3,3));
+    cvtColor(contrast, contrast, COLOR_BGR2GRAY);
+    threshold(contrast, image,255,255,THRESH_OTSU);
 }
 
 Hand::Hand(Mat frame, Mat background){
-    frame = 1.45*frame; //Aument contrast by multiplying integer
+    frame = 1.45*frame; //Aument saturation by multiplying integer
     absdiff(background,frame, contrast);
-    contrast = 3.45*contrast; //Aument contrast by multiplying integer
+    contrast = 2.25*contrast; //Aument saturation by multiplying integer
+    blur(contrast,contrast,Size(3,3));
     cvtColor(contrast, contrast, COLOR_BGR2GRAY );
     threshold(contrast, image,255,255,THRESH_OTSU);
 }
