@@ -33,12 +33,25 @@ Hand::Hand(Mat frame){
 }
 
 Hand::Hand(Mat frame, Mat background){
-    frame = 1.45*frame; //Aument saturation by multiplying integer
+    Mat noise, fmask;
+    frame = 1.35*frame; //Aument saturation by multiplying integer
     absdiff(background,frame, contrast);
-    contrast = 2.25*contrast; //Aument saturation by multiplying integer
+    //Set pixels bellow 15 (detected as noise) to black
+    noise = abs(contrast)<15;
+    noise = 0;
+    bitwise_or(contrast,noise,contrast);
+    // Blur Image
     blur(contrast,contrast,Size(3,3));
+    // Turn Image to grayscale
     cvtColor(contrast, contrast, COLOR_BGR2GRAY );
-    threshold(contrast, image,255,255,THRESH_OTSU);
+    // Set grays as blacks;
+    noise = abs(contrast)<10;
+    noise = 0;
+    bitwise_or(contrast,noise, contrast);
+    // Aument saturarion
+    contrast = 3.5*contrast;
+    // Apply Otsu Thresholding
+    threshold(contrast, image,70,255,THRESH_OTSU);
 }
 
 
