@@ -28,6 +28,7 @@ public:
     Hand(Mat frame, Mat background);
     void drawHand(Mat frame);
     void getHand();
+    int countFingers();
     Mat returnImage();
 };
 
@@ -44,6 +45,8 @@ Hand::Hand(Mat frame, Mat background){
     // Blur Image
     GaussianBlur(contrast,contrast,Size(7,7),0,0);
     // Turn Image to grayscale
+    //Erode image
+    //Dilate image
     cvtColor(contrast, contrast, COLOR_BGR2GRAY );
     // Set grays as blacks;
     noise = abs(contrast)<10;
@@ -65,7 +68,6 @@ void Hand::getHand(){
     bitwise_not(image,image);
     findContours(image,countours,hierchy,RETR_EXTERNAL,CHAIN_APPROX_SIMPLE);
     double largestArea = 0;
-    cout<<"Contours: "<< countours.size()<<endl;
     // Find largest area in contour vector representing hand
     for (int i = 0; i < countours.size(); i++){
         // Store biggest area ID and refresh biggest area
@@ -79,8 +81,16 @@ void Hand::drawHand(Mat frame){
     //drawContours(frame, countours, -1,green,5,8,hierchy);
     // Draw all contours in vector "contours"
     drawContours(frame(ROI),countours,handID,red,2,8,hierchy);
+}
 
-    
+int Hand::countFingers(){
+    vector<Point> hull,hullDefects; 
+    convexHull(countours[handID],hull);
+    convexityDefects(countours[handID],hull,hullDefects);
+    fingers =hullDefects.size();
+    return fingers;
+
+
 }
 
 int main() {
@@ -116,6 +126,7 @@ int main() {
             h1.getHand();
             h1.drawHand(frame);
             imshow("Camera Feed", frame);
+            cout<<"Fingers detected: "<<h1.countFingers()<<endl;
             imshow("Region of Interest", h1.returnImage());
             // Read key board input, setting esc as break key
             if(waitKey(10)== 27){
