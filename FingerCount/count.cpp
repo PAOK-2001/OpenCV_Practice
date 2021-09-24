@@ -13,6 +13,7 @@ using namespace std;
 using namespace cv;
 Scalar red   = Scalar(0,0,255);
 Scalar green = Scalar(0,255,0);
+Rect ROI(410,45,225,225);
 
 class Hand{
 private:
@@ -30,18 +31,18 @@ public:
     Mat returnImage();
 };
 
-
+// constructor for object Hand, that creates a thresholded image for hand segmentaton
 Hand::Hand(Mat frame, Mat background){
     Mat contrast;
     Mat noise, fmask;
-    frame = 1.35*frame; //Aument saturation by multiplying integer
+    frame = 1.45*frame; //Aument saturation by multiplying integer
     absdiff(background,frame, contrast);
     //Set pixels bellow 15 (detected as noise) to black
-    noise = abs(contrast)<15;
+    noise = abs(contrast)<13.0;
     noise = 0;
     bitwise_or(contrast,noise,contrast);
     // Blur Image
-    blur(contrast,contrast,Size(7,7));
+    GaussianBlur(contrast,contrast,Size(7,7),0,0);
     // Turn Image to grayscale
     cvtColor(contrast, contrast, COLOR_BGR2GRAY );
     // Set grays as blacks;
@@ -51,7 +52,7 @@ Hand::Hand(Mat frame, Mat background){
     // Aument saturarion
     contrast = 3.5*contrast;
     // Apply Otsu Thresholding
-    threshold(contrast, image,70,255,THRESH_OTSU);
+    threshold(contrast, image,200,255,THRESH_OTSU);
 }
 
 
@@ -60,10 +61,14 @@ Mat Hand::returnImage(){
 }
 
 void Hand::getHand(){
-    
+    //Find contours of segmented hand, using mode: RETR_EXTERNAL to find external contours.
+    bitwise_not(image,image);
     findContours(image,countours,hierchy,RETR_EXTERNAL,CHAIN_APPROX_SIMPLE);
     double largestArea = 0;
+    cout<<"Contours: "<< countours.size()<<endl;
+    // Find largest area in contour vector representing hand
     for (int i = 0; i < countours.size(); i++){
+        // Store biggest area ID and refresh biggest area
         if(contourArea(countours[i])>largestArea){
             handID = i;
             largestArea = contourArea(countours[i]);        }
@@ -71,15 +76,14 @@ void Hand::getHand(){
 }
 
 void Hand::drawHand(Mat frame){
-    drawContours(frame, countours, -1,green,5,8,hierchy);
-    drawContours(image,countours,-1,red,7,8,hierchy);
+    //drawContours(frame, countours, -1,green,5,8,hierchy);
+    // Draw all contours in vector "contours"
+    drawContours(frame(ROI),countours,handID,red,2,8,hierchy);
 
     
 }
 
 int main() {
-    vector<vector<Point>> countours;
-    vector<Vec4i> hierchy;
     bool hasBackground = false;
     // Create OpenCV frame object to store frame information
     Mat frame;
@@ -87,7 +91,6 @@ int main() {
     Mat background;
     Scalar color;
     // Rectangle that limits the Region of Interest (ROI)
-    Rect ROI(410,45,225,225);
 
     // Create VideoCapture object, reading video device (USB camera)
     VideoCapture camera(2);
@@ -99,6 +102,7 @@ int main() {
     }
 
     for (;;){
+        // Finger counting only occurs when a background has been regustered
         if (hasBackground){
             color = green;
             camera.read(frame);
@@ -134,7 +138,6 @@ int main() {
             }
             putText(frame,"No background!",Point(10,450),FONT_HERSHEY_TRIPLEX,1,color,3);
             rectangle(frame,ROI,color,2);
-            Hand h1(frame(ROI));
             imshow("Camera Feed", frame);
             // Read key board input, setting esc as break key
             if(waitKey(10)== 27){
